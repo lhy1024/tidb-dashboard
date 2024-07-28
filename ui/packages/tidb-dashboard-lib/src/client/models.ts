@@ -241,6 +241,12 @@ export interface ConfigSSOCoreConfig {
      * @type {string}
      * @memberof ConfigSSOCoreConfig
      */
+    'client_secret'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConfigSSOCoreConfig
+     */
     'discovery_url'?: string;
     /**
      * 
@@ -254,6 +260,12 @@ export interface ConfigSSOCoreConfig {
      * @memberof ConfigSSOCoreConfig
      */
     'is_read_only'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConfigSSOCoreConfig
+     */
+    'scopes'?: string;
 }
 
 
@@ -1737,6 +1749,12 @@ export interface ModelRequestTargetStatistics {
      * @type {number}
      * @memberof ModelRequestTargetStatistics
      */
+    'num_ticdc_nodes'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ModelRequestTargetStatistics
+     */
     'num_tidb_nodes'?: number;
     /**
      * 
@@ -1750,6 +1768,12 @@ export interface ModelRequestTargetStatistics {
      * @memberof ModelRequestTargetStatistics
      */
     'num_tikv_nodes'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ModelRequestTargetStatistics
+     */
+    'num_tiproxy_nodes'?: number;
 }
 
 
@@ -2149,6 +2173,12 @@ export interface SlowqueryGetListRequest {
     'plans'?: Array<string>;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof SlowqueryGetListRequest
+     */
+    'resource_group'?: Array<string>;
+    /**
+     * 
      * @type {string}
      * @memberof SlowqueryGetListRequest
      */
@@ -2442,6 +2472,12 @@ export interface SlowqueryModel {
     'resolve_lock_time'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof SlowqueryModel
+     */
+    'resource_group'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof SlowqueryModel
      */
@@ -2477,6 +2513,12 @@ export interface SlowqueryModel {
      */
     'rocksdb_key_skipped_count'?: number;
     /**
+     * Resource Control
+     * @type {number}
+     * @memberof SlowqueryModel
+     */
+    'ru'?: number;
+    /**
      * 
      * @type {string}
      * @memberof SlowqueryModel
@@ -2488,6 +2530,12 @@ export interface SlowqueryModel {
      * @memberof SlowqueryModel
      */
     'success'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SlowqueryModel
+     */
+    'time_queued_by_rc'?: number;
     /**
      * finish time
      * @type {number}
@@ -2748,6 +2796,12 @@ export interface StatementGetStatementsRequest {
      * @type {Array<string>}
      * @memberof StatementGetStatementsRequest
      */
+    'resource_groups'?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof StatementGetStatementsRequest
+     */
     'schemas'?: Array<string>;
     /**
      * 
@@ -2910,6 +2964,18 @@ export interface StatementModel {
      * @memberof StatementModel
      */
     'avg_rocksdb_key_skipped_count'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
+    'avg_ru'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
+    'avg_time_queued_by_rc'?: number;
     /**
      * 
      * @type {number}
@@ -3131,6 +3197,18 @@ export interface StatementModel {
      * @type {number}
      * @memberof StatementModel
      */
+    'max_ru'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
+    'max_time_queued_by_rc'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
     'max_total_keys'?: number;
     /**
      * 
@@ -3168,6 +3246,12 @@ export interface StatementModel {
      * @memberof StatementModel
      */
     'plan'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
+    'plan_cache_hits'?: number;
     /**
      * 
      * @type {boolean}
@@ -3211,6 +3295,12 @@ export interface StatementModel {
      */
     'related_schemas'?: string;
     /**
+     * Resource Control
+     * @type {string}
+     * @memberof StatementModel
+     */
+    'resource_group'?: string;
+    /**
      * 
      * @type {string}
      * @memberof StatementModel
@@ -3252,6 +3342,12 @@ export interface StatementModel {
      * @memberof StatementModel
      */
     'sum_latency'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
+    'sum_ru'?: number;
     /**
      * 
      * @type {number}
@@ -3514,6 +3610,71 @@ export interface TopologyStoreLocation {
 /**
  * 
  * @export
+ * @interface TopologyTiCDCInfo
+ */
+export interface TopologyTiCDCInfo {
+    /**
+     * 
+     * @type {string}
+     * @memberof TopologyTiCDCInfo
+     */
+    'cluster_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TopologyTiCDCInfo
+     */
+    'deploy_path'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TopologyTiCDCInfo
+     */
+    'git_hash'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TopologyTiCDCInfo
+     */
+    'ip'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof TopologyTiCDCInfo
+     */
+    'port'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TopologyTiCDCInfo
+     */
+    'start_timestamp'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TopologyTiCDCInfo
+     */
+    'status'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TopologyTiCDCInfo
+     */
+    'status_port'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof TopologyTiCDCInfo
+     */
+    'version'?: string;
+}
+
+
+
+
+/**
+ * 
+ * @export
  * @interface TopologyTiDBInfo
  */
 export interface TopologyTiDBInfo {
@@ -3563,6 +3724,65 @@ export interface TopologyTiDBInfo {
      * 
      * @type {string}
      * @memberof TopologyTiDBInfo
+     */
+    'version'?: string;
+}
+
+
+
+
+/**
+ * 
+ * @export
+ * @interface TopologyTiProxyInfo
+ */
+export interface TopologyTiProxyInfo {
+    /**
+     * 
+     * @type {string}
+     * @memberof TopologyTiProxyInfo
+     */
+    'deploy_path'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TopologyTiProxyInfo
+     */
+    'git_hash'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TopologyTiProxyInfo
+     */
+    'ip'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof TopologyTiProxyInfo
+     */
+    'port'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TopologyTiProxyInfo
+     */
+    'start_timestamp'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TopologyTiProxyInfo
+     */
+    'status'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TopologyTiProxyInfo
+     */
+    'status_port'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof TopologyTiProxyInfo
      */
     'version'?: string;
 }

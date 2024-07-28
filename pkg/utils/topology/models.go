@@ -1,4 +1,4 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 package topology
 
@@ -23,6 +23,29 @@ type PDInfo struct {
 }
 
 type TiDBInfo struct {
+	GitHash        string          `json:"git_hash"`
+	Version        string          `json:"version"`
+	IP             string          `json:"ip"`
+	Port           uint            `json:"port"`
+	DeployPath     string          `json:"deploy_path"`
+	Status         ComponentStatus `json:"status"`
+	StatusPort     uint            `json:"status_port"`
+	StartTimestamp int64           `json:"start_timestamp"`
+}
+
+type TiCDCInfo struct {
+	ClusterName    string          `json:"cluster_name"`
+	GitHash        string          `json:"git_hash"`
+	Version        string          `json:"version"`
+	IP             string          `json:"ip"`
+	Port           uint            `json:"port"`
+	DeployPath     string          `json:"deploy_path"`
+	Status         ComponentStatus `json:"status"`
+	StatusPort     uint            `json:"status_port"`
+	StartTimestamp int64           `json:"start_timestamp"`
+}
+
+type TiProxyInfo struct {
 	GitHash        string          `json:"git_hash"`
 	Version        string          `json:"version"`
 	IP             string          `json:"ip"`

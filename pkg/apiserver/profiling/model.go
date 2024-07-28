@@ -1,4 +1,4 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 package profiling
 
@@ -30,6 +30,7 @@ const (
 type TaskRawDataType string
 
 const (
+	RawDataTypeJeprof   TaskRawDataType = "jeprof"
 	RawDataTypeProtobuf TaskRawDataType = "protobuf"
 	RawDataTypeText     TaskRawDataType = "text"
 )

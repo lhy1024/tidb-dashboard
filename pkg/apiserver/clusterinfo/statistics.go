@@ -1,10 +1,11 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 package clusterinfo
 
 import (
-	"fmt"
+	"net"
 	"sort"
+	"strconv"
 
 	"github.com/samber/lo"
 	"gorm.io/gorm"
@@ -74,6 +75,8 @@ func (s *Service) calculateStatistics(db *gorm.DB) (*ClusterStatistics, error) {
 	infoByIk["tidb"] = newInstanceKindImmediateInfo()
 	infoByIk["tikv"] = newInstanceKindImmediateInfo()
 	infoByIk["tiflash"] = newInstanceKindImmediateInfo()
+	infoByIk["ticdc"] = newInstanceKindImmediateInfo()
+	infoByIk["tiproxy"] = newInstanceKindImmediateInfo()
 
 	// Fill from topology info
 	pdInfo, err := topology.FetchPDTopology(s.params.PDClient)
@@ -83,8 +86,8 @@ func (s *Service) calculateStatistics(db *gorm.DB) (*ClusterStatistics, error) {
 	for _, i := range pdInfo {
 		globalHostsSet[i.IP] = struct{}{}
 		globalVersionsSet[i.Version] = struct{}{}
-		globalInfo.instances[fmt.Sprintf("%s:%d", i.IP, i.Port)] = struct{}{}
-		infoByIk["pd"].instances[fmt.Sprintf("%s:%d", i.IP, i.Port)] = struct{}{}
+		globalInfo.instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
+		infoByIk["pd"].instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
 	}
 	tikvInfo, tiFlashInfo, err := topology.FetchStoreTopology(s.params.PDClient)
 	if err != nil {
@@ -93,14 +96,14 @@ func (s *Service) calculateStatistics(db *gorm.DB) (*ClusterStatistics, error) {
 	for _, i := range tikvInfo {
 		globalHostsSet[i.IP] = struct{}{}
 		globalVersionsSet[i.Version] = struct{}{}
-		globalInfo.instances[fmt.Sprintf("%s:%d", i.IP, i.Port)] = struct{}{}
-		infoByIk["tikv"].instances[fmt.Sprintf("%s:%d", i.IP, i.Port)] = struct{}{}
+		globalInfo.instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
+		infoByIk["tikv"].instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
 	}
 	for _, i := range tiFlashInfo {
 		globalHostsSet[i.IP] = struct{}{}
 		globalVersionsSet[i.Version] = struct{}{}
-		globalInfo.instances[fmt.Sprintf("%s:%d", i.IP, i.Port)] = struct{}{}
-		infoByIk["tiflash"].instances[fmt.Sprintf("%s:%d", i.IP, i.Port)] = struct{}{}
+		globalInfo.instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
+		infoByIk["tiflash"].instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
 	}
 	tidbInfo, err := topology.FetchTiDBTopology(s.lifecycleCtx, s.params.EtcdClient)
 	if err != nil {
@@ -109,8 +112,28 @@ func (s *Service) calculateStatistics(db *gorm.DB) (*ClusterStatistics, error) {
 	for _, i := range tidbInfo {
 		globalHostsSet[i.IP] = struct{}{}
 		globalVersionsSet[i.Version] = struct{}{}
-		globalInfo.instances[fmt.Sprintf("%s:%d", i.IP, i.Port)] = struct{}{}
-		infoByIk["tidb"].instances[fmt.Sprintf("%s:%d", i.IP, i.Port)] = struct{}{}
+		globalInfo.instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
+		infoByIk["tidb"].instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
+	}
+	ticdcInfo, err := topology.FetchTiCDCTopology(s.lifecycleCtx, s.params.EtcdClient)
+	if err != nil {
+		return nil, err
+	}
+	for _, i := range ticdcInfo {
+		globalHostsSet[i.IP] = struct{}{}
+		globalVersionsSet[i.Version] = struct{}{}
+		globalInfo.instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
+		infoByIk["ticdc"].instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
+	}
+	tiproxyInfo, err := topology.FetchTiProxyTopology(s.lifecycleCtx, s.params.EtcdClient)
+	if err != nil {
+		return nil, err
+	}
+	for _, i := range tiproxyInfo {
+		globalHostsSet[i.IP] = struct{}{}
+		globalVersionsSet[i.Version] = struct{}{}
+		globalInfo.instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
+		infoByIk["tiproxy"].instances[net.JoinHostPort(i.IP, strconv.Itoa(int(i.Port)))] = struct{}{}
 	}
 
 	// Fill from hardware info
@@ -157,6 +180,20 @@ func (s *Service) calculateStatistics(db *gorm.DB) (*ClusterStatistics, error) {
 	for _, i := range tidbInfo {
 		if v, ok := globalInfo.hosts[i.IP]; ok {
 			infoByIk["tidb"].hosts[i.IP] = v
+		} else {
+			globalFailureHostsSet[i.IP] = struct{}{}
+		}
+	}
+	for _, i := range ticdcInfo {
+		if v, ok := globalInfo.hosts[i.IP]; ok {
+			infoByIk["ticdc"].hosts[i.IP] = v
+		} else {
+			globalFailureHostsSet[i.IP] = struct{}{}
+		}
+	}
+	for _, i := range tiproxyInfo {
+		if v, ok := globalInfo.hosts[i.IP]; ok {
+			infoByIk["tiproxy"].hosts[i.IP] = v
 		} else {
 			globalFailureHostsSet[i.IP] = struct{}{}
 		}

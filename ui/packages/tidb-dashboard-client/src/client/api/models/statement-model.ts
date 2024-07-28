@@ -163,6 +163,18 @@ export interface StatementModel {
      * @type {number}
      * @memberof StatementModel
      */
+    'avg_ru'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
+    'avg_time_queued_by_rc'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
     'avg_total_keys'?: number;
     /**
      * 
@@ -379,6 +391,18 @@ export interface StatementModel {
      * @type {number}
      * @memberof StatementModel
      */
+    'max_ru'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
+    'max_time_queued_by_rc'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
     'max_total_keys'?: number;
     /**
      * 
@@ -416,6 +440,12 @@ export interface StatementModel {
      * @memberof StatementModel
      */
     'plan'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
+    'plan_cache_hits'?: number;
     /**
      * 
      * @type {boolean}
@@ -459,6 +489,12 @@ export interface StatementModel {
      */
     'related_schemas'?: string;
     /**
+     * Resource Control
+     * @type {string}
+     * @memberof StatementModel
+     */
+    'resource_group'?: string;
+    /**
      * 
      * @type {string}
      * @memberof StatementModel
@@ -500,6 +536,12 @@ export interface StatementModel {
      * @memberof StatementModel
      */
     'sum_latency'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof StatementModel
+     */
+    'sum_ru'?: number;
     /**
      * 
      * @type {number}

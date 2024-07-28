@@ -1,4 +1,4 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 // clusterinfo is a directory for ClusterInfoServer, which could load topology from pd
 // using Etcd v3 interface and pd interface.
@@ -54,6 +54,8 @@ func RegisterRouter(r *gin.RouterGroup, auth *user.AuthService, s *Service) {
 	endpoint := r.Group("/topology")
 	endpoint.Use(auth.MWAuthRequired())
 	endpoint.GET("/tidb", s.getTiDBTopology)
+	endpoint.GET("/ticdc", s.getTiCDCTopology)
+	endpoint.GET("/tiproxy", s.getTiProxyTopology)
 	endpoint.DELETE("/tidb/:address", s.deleteTiDBTopology)
 	endpoint.GET("/store", s.getStoreTopology)
 	endpoint.GET("/pd", s.getPDTopology)
@@ -117,6 +119,36 @@ func (s *Service) deleteTiDBTopology(c *gin.Context) {
 // @Failure 401 {object} rest.ErrorResponse
 func (s *Service) getTiDBTopology(c *gin.Context) {
 	instances, err := topology.FetchTiDBTopology(s.lifecycleCtx, s.params.EtcdClient)
+	if err != nil {
+		rest.Error(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, instances)
+}
+
+// @ID getTiCDCTopology
+// @Summary Get all TiCDC instances
+// @Success 200 {array} topology.TiCDCInfo
+// @Router /topology/ticdc [get]
+// @Security JwtAuth
+// @Failure 401 {object} rest.ErrorResponse
+func (s *Service) getTiCDCTopology(c *gin.Context) {
+	instances, err := topology.FetchTiCDCTopology(s.lifecycleCtx, s.params.EtcdClient)
+	if err != nil {
+		rest.Error(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, instances)
+}
+
+// @ID getTiProxyTopology
+// @Summary Get all TiProxy instances
+// @Success 200 {array} topology.TiProxyInfo
+// @Router /topology/tiproxy [get]
+// @Security JwtAuth
+// @Failure 401 {object} rest.ErrorResponse
+func (s *Service) getTiProxyTopology(c *gin.Context) {
+	instances, err := topology.FetchTiProxyTopology(s.lifecycleCtx, s.params.EtcdClient)
 	if err != nil {
 		rest.Error(c, err)
 		return

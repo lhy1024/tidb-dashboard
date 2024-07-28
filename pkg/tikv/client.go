@@ -1,4 +1,4 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 package tikv
 
@@ -6,9 +6,12 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"strconv"
 	"time"
 
+	"go.etcd.io/etcd/pkg/transport"
 	"go.uber.org/fx"
 
 	"github.com/pingcap/tidb-dashboard/pkg/config"
@@ -27,6 +30,7 @@ type Client struct {
 	httpScheme   string
 	lifecycleCtx context.Context
 	timeout      time.Duration
+	tlsInfo      *transport.TLSInfo
 }
 
 func NewTiKVClient(lc fx.Lifecycle, httpClient *httpc.Client, config *config.Config) *Client {
@@ -35,6 +39,7 @@ func NewTiKVClient(lc fx.Lifecycle, httpClient *httpc.Client, config *config.Con
 		httpScheme:   config.GetClusterHTTPScheme(),
 		lifecycleCtx: nil,
 		timeout:      defaultTiKVStatusAPITimeout,
+		tlsInfo:      config.ClusterTLSInfo,
 	}
 
 	lc.Append(fx.Hook{
@@ -57,8 +62,16 @@ func (c Client) AddRequestHeader(key, value string) *Client {
 	return &c
 }
 
+func (c *Client) GetHTTPScheme() string {
+	return c.httpScheme
+}
+
+func (c *Client) GetTLSInfo() *transport.TLSInfo {
+	return c.tlsInfo
+}
+
 func (c *Client) Get(host string, statusPort int, relativeURI string) (*httpc.Response, error) {
-	uri := fmt.Sprintf("%s://%s:%d%s", c.httpScheme, host, statusPort, relativeURI)
+	uri := fmt.Sprintf("%s://%s%s", c.httpScheme, net.JoinHostPort(host, strconv.Itoa(statusPort)), relativeURI)
 	return c.httpClient.WithTimeout(c.timeout).Send(c.lifecycleCtx, uri, http.MethodGet, nil, ErrTiKVClientRequestFailed, distro.R().TiKV)
 }
 
@@ -71,6 +84,6 @@ func (c *Client) SendGetRequest(host string, statusPort int, relativeURI string)
 }
 
 func (c *Client) SendPostRequest(host string, statusPort int, relativeURI string, body io.Reader) ([]byte, error) {
-	uri := fmt.Sprintf("%s://%s:%d%s", c.httpScheme, host, statusPort, relativeURI)
+	uri := fmt.Sprintf("%s://%s%s", c.httpScheme, net.JoinHostPort(host, strconv.Itoa(statusPort)), relativeURI)
 	return c.httpClient.WithTimeout(c.timeout).SendRequest(c.lifecycleCtx, uri, http.MethodPost, body, ErrTiKVClientRequestFailed, distro.R().TiKV)
 }

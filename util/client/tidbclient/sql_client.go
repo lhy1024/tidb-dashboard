@@ -1,11 +1,12 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 package tidbclient
 
 import (
 	"context"
 	"errors"
-	"fmt"
+	"net"
+	"strconv"
 	"time"
 
 	"github.com/VividCortex/mysqlerr"
@@ -50,7 +51,7 @@ func NewSQLClient(config SQLClientConfig) *SQLClient {
 func (c *SQLClient) OpenConn(user string, pass string) (*gorm.DB, error) {
 	dsnConfig := mysql.NewConfig()
 	dsnConfig.Net = "tcp"
-	dsnConfig.Addr = fmt.Sprintf("%s:%d", c.config.Host, c.config.Port)
+	dsnConfig.Addr = net.JoinHostPort(c.config.Host, strconv.Itoa(c.config.Port))
 	dsnConfig.User = user
 	dsnConfig.Passwd = pass
 	dsnConfig.Timeout = time.Second * 60

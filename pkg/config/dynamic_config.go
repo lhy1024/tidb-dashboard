@@ -1,4 +1,4 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 package config
 
@@ -47,7 +47,9 @@ type ProfilingConfig struct {
 type SSOCoreConfig struct {
 	Enabled      bool   `json:"enabled"`
 	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
 	DiscoveryURL string `json:"discovery_url"`
+	Scopes       string `json:"scopes"`
 	IsReadOnly   bool   `json:"is_read_only"`
 }
 

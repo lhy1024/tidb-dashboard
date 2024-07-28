@@ -1,4 +1,4 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 // @title Dashboard API
 // @version 1.0
@@ -23,6 +23,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -68,6 +69,7 @@ func NewCLIConfig() *DashboardCLIConfig {
 	flag.BoolVar(&cfg.CoreConfig.EnableExperimental, "experimental", cfg.CoreConfig.EnableExperimental, "allow experimental features")
 	flag.StringVar(&cfg.CoreConfig.FeatureVersion, "feature-version", cfg.CoreConfig.FeatureVersion, "target TiDB version for standalone mode")
 	flag.IntVar(&cfg.CoreConfig.NgmTimeout, "ngm-timeout", cfg.CoreConfig.NgmTimeout, "timeout secs for accessing the ngm API")
+	flag.BoolVar(&cfg.CoreConfig.EnableKeyVisualizer, "keyviz", true, "enable/disable key visualizer(default: true)")
 
 	showVersion := flag.BoolP("version", "v", false, "print version information and exit")
 
@@ -98,13 +100,24 @@ func NewCLIConfig() *DashboardCLIConfig {
 
 	// setup TLS config for TiDB components
 	if len(*clusterCaPath) != 0 && len(*clusterCertPath) != 0 && len(*clusterKeyPath) != 0 {
-		cfg.CoreConfig.ClusterTLSConfig = buildTLSConfig(clusterCaPath, clusterKeyPath, clusterCertPath, clusterAllowedNames)
+		tlsInfo := &transport.TLSInfo{
+			TrustedCAFile: *clusterCaPath,
+			KeyFile:       *clusterKeyPath,
+			CertFile:      *clusterCertPath,
+		}
+		cfg.CoreConfig.ClusterTLSInfo = tlsInfo
+		cfg.CoreConfig.ClusterTLSConfig = buildTLSConfig(tlsInfo, clusterAllowedNames)
 	}
 
 	// setup TLS config for MySQL client
 	// See https://github.com/pingcap/docs/blob/7a62321b3ce9318cbda8697503c920b2a01aeb3d/how-to/secure/enable-tls-clients.md#enable-authentication
 	if (len(*tidbCertPath) != 0 && len(*tidbKeyPath) != 0) || len(*tidbCaPath) != 0 {
-		cfg.CoreConfig.TiDBTLSConfig = buildTLSConfig(tidbCaPath, tidbKeyPath, tidbCertPath, tidbAllowedNames)
+		tlsInfo := &transport.TLSInfo{
+			TrustedCAFile: *tidbCaPath,
+			KeyFile:       *tidbKeyPath,
+			CertFile:      *tidbCertPath,
+		}
+		cfg.CoreConfig.TiDBTLSConfig = buildTLSConfig(tlsInfo, tidbAllowedNames)
 	}
 
 	if err := cfg.CoreConfig.NormalizePDEndPoint(); err != nil {
@@ -139,13 +152,7 @@ func getContext() context.Context {
 	return ctx
 }
 
-func buildTLSConfig(caPath, keyPath, certPath, allowedNames *string) *tls.Config {
-	tlsInfo := transport.TLSInfo{
-		TrustedCAFile: *caPath,
-		KeyFile:       *keyPath,
-		CertFile:      *certPath,
-	}
-
+func buildTLSConfig(tlsInfo *transport.TLSInfo, allowedNames *string) *tls.Config {
 	tlsConfig, err := tlsInfo.ClientConfig()
 	if err != nil {
 		log.Fatal("Failed to load certificates", zap.Error(err))
@@ -240,7 +247,7 @@ func main() {
 
 	loadDistroStringsRes()
 
-	listenAddr := fmt.Sprintf("%s:%d", cliConfig.ListenHost, cliConfig.ListenPort)
+	listenAddr := net.JoinHostPort(cliConfig.ListenHost, strconv.Itoa(cliConfig.ListenPort))
 	listener, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		log.Fatal("Dashboard server listen failed", zap.String("addr", listenAddr), zap.Error(err))
@@ -273,9 +280,9 @@ func main() {
 	mux.Handle(config.SwaggerPathPrefix, swaggerserver.Handler())
 
 	log.Info(fmt.Sprintf("Dashboard server is listening at %s", listenAddr))
-	log.Info(fmt.Sprintf("UI:      http://%s:%d/dashboard/", cliConfig.ListenHost, cliConfig.ListenPort))
-	log.Info(fmt.Sprintf("API:     http://%s:%d/dashboard/api/", cliConfig.ListenHost, cliConfig.ListenPort))
-	log.Info(fmt.Sprintf("Swagger: http://%s:%d/dashboard/api/swagger/", cliConfig.ListenHost, cliConfig.ListenPort))
+	log.Info(fmt.Sprintf("UI:      http://%s/dashboard/", net.JoinHostPort(cliConfig.ListenHost, strconv.Itoa(cliConfig.ListenPort))))
+	log.Info(fmt.Sprintf("API:     http://%s/dashboard/api/", net.JoinHostPort(cliConfig.ListenHost, strconv.Itoa(cliConfig.ListenPort))))
+	log.Info(fmt.Sprintf("Swagger: http://%s/dashboard/api/swagger/", net.JoinHostPort(cliConfig.ListenHost, strconv.Itoa(cliConfig.ListenPort))))
 
 	srv := &http.Server{Handler: mux} // nolint:gosec
 	var wg sync.WaitGroup

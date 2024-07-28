@@ -1,4 +1,4 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 package sso
 
@@ -111,6 +111,8 @@ func (s *Service) getConfig(c *gin.Context) {
 		rest.Error(c, err)
 		return
 	}
+	// Hide client secret for security
+	dc.SSO.CoreConfig.ClientSecret = ""
 	c.JSON(http.StatusOK, dc.SSO.CoreConfig)
 }
 

@@ -34,6 +34,10 @@ export const tabBasicItems = (data: StatementModel) => [
     value: <ValueWithTooltip.Short value={data.exec_count} />
   },
   {
+    key: 'plan_cache_hits',
+    value: <ValueWithTooltip.Short value={data.plan_cache_hits} />
+  },
+  {
     key: 'sum_latency',
     value: getValueFormat('ns')(data.sum_latency || 0, 1)
   },
@@ -61,5 +65,17 @@ export const tabBasicItems = (data: StatementModel) => [
   {
     key: 'max_disk',
     value: getValueFormat('bytes')(data.max_disk || 0, 1)
+  },
+  {
+    key: 'avg_ru',
+    value: getValueFormat('short')(data.avg_ru || 0, 1)
+  },
+  {
+    key: 'max_ru',
+    value: getValueFormat('short')(data.max_ru || 0, 1)
+  },
+  {
+    key: 'resource_group',
+    value: data.resource_group
   }
 ]

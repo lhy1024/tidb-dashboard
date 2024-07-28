@@ -1,4 +1,4 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 package logsearch
 
@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"net"
 	"os"
 	"path"
 	"path/filepath"
@@ -168,7 +169,7 @@ func (t *Task) SyncRun() {
 		secureOpt = grpc.WithTransportCredentials(creds)
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", t.model.Target.IP, t.model.Target.Port),
+	conn, err := grpc.Dial(net.JoinHostPort(t.model.Target.IP, strconv.Itoa(t.model.Target.Port)),
 		secureOpt,
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(MaxRecvMsgSize)),
 	)

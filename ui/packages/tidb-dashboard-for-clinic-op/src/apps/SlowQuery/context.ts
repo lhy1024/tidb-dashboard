@@ -27,7 +27,18 @@ class DataSource implements ISlowQueryDataSource {
       statusText: 'ok',
       headers: {},
       config: {}
-    })
+    } as any)
+  }
+
+  infoListResourceGroupNames(options?: ReqConfig) {
+    // return Promise.reject(new Error('no need to implemented'))
+    return Promise.resolve({
+      data: [],
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {}
+    } as any)
   }
 
   slowQueryAvailableFieldsGet(options?: ReqConfig) {
@@ -38,7 +49,7 @@ class DataSource implements ISlowQueryDataSource {
       statusText: 'ok',
       headers: {},
       config: {}
-    })
+    } as any)
   }
 
   slowQueryListGet(
@@ -51,6 +62,7 @@ class DataSource implements ISlowQueryDataSource {
     limit?: number,
     orderBy?: string,
     plans?: Array<string>,
+    resourceGroup?: Array<string>,
     text?: string,
     options?: ReqConfig
   ) {
@@ -118,6 +130,8 @@ export const ctx: (extra: DsExtra) => ISlowQueryContext = (extra) => ({
   cfg: {
     apiPathBase: client.getBasePath(),
     enableExport: false,
-    showDBFilter: false
+    showDBFilter: false,
+    showDigestFilter: false,
+    showResourceGroupFilter: true
   }
 })

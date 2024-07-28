@@ -1,4 +1,4 @@
-// Copyright 2023 PingCAP, Inc. Licensed under Apache-2.0.
+// Copyright 2024 PingCAP, Inc. Licensed under Apache-2.0.
 
 package clusterinfo
 
@@ -41,6 +41,22 @@ func (s *Service) fetchAllInstanceHosts() ([]string, error) {
 		return nil, err
 	}
 	for _, i := range tidbInfo {
+		allHostsMap[i.IP] = struct{}{}
+	}
+
+	ticdcInfo, err := topology.FetchTiCDCTopology(s.lifecycleCtx, s.params.EtcdClient)
+	if err != nil {
+		return nil, err
+	}
+	for _, i := range ticdcInfo {
+		allHostsMap[i.IP] = struct{}{}
+	}
+
+	tiproxyInfo, err := topology.FetchTiProxyTopology(s.lifecycleCtx, s.params.EtcdClient)
+	if err != nil {
+		return nil, err
+	}
+	for _, i := range tiproxyInfo {
 		allHostsMap[i.IP] = struct{}{}
 	}
 
